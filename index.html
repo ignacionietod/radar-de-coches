@@ -1,0 +1,384 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Radar de Coches</title>
+<meta name="theme-color" content="#14181f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: una columna móvil — cabecera, formulario plegable, enlaces por portal, lista de anuncios */
+:root{
+  --bg:#eef0f3; --surface:#ffffff; --sunk:#e3e6eb; --fg:#151a22; --muted:#5b6575; --line:#d3d8e0;
+  --accent:#1d5bd8; --accent-fg:#ffffff; --accent-soft:#dfe8fb;
+  --lab-0:#2a6fdb; --lab-eco:#1f9d6b; --lab-c:#2f9e44; --lab-b:#e0b400; --lab-none:#8a93a3;
+  --warn:#9a5b00; --warn-soft:#fff1d6;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1217; --surface:#181d25; --sunk:#11151b; --fg:#e8ecf2; --muted:#9aa4b4; --line:#2a313d;
+  --accent:#5b8ff0; --accent-fg:#0b0f15; --accent-soft:#1c2a45;
+  --warn:#f0b65c; --warn-soft:#2e2412; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0f1217; --surface:#181d25; --sunk:#11151b; --fg:#e8ecf2; --muted:#9aa4b4; --line:#2a313d;
+  --accent:#5b8ff0; --accent-fg:#0b0f15; --accent-soft:#1c2a45;
+  --warn:#f0b65c; --warn-soft:#2e2412; color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;margin:0}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:14px 48px;display:flex;flex-direction:column;gap:18px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:700;font-size:2.1rem;line-height:1;margin:0;letter-spacing:.01em;text-transform:uppercase}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);font-size:.85rem;margin:4px 0 0}
+h2{font-family:var(--display);font-weight:600;font-size:1.35rem;margin:0;text-transform:uppercase;letter-spacing:.03em;text-wrap:balance}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.full{grid-column:1/-1}
+label.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+label.f>span,.lbl{font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+input,select{font:inherit;font-size:16px;color:var(--fg);background:var(--sunk);border:1px solid var(--line);border-radius:9px;padding:10px 11px;width:100%;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pair{display:flex;gap:8px;align-items:center}
+.pair .dash{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--sunk);color:var(--fg);border-radius:999px;padding:7px 12px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:600}
+.lab{display:inline-grid;place-items:center;min-width:26px;height:26px;border-radius:50%;font-family:var(--display);font-weight:700;font-size:.85rem;color:#fff;padding:0 5px}
+.lab.l0{background:var(--lab-0)} .lab.leco{background:linear-gradient(90deg,var(--lab-0) 50%,var(--lab-eco) 50%);border-radius:13px;font-size:.72rem}
+.lab.lc{background:var(--lab-c)} .lab.lb{background:var(--lab-b);color:#1d1a00} .lab.lnone{background:var(--lab-none);font-size:.65rem}
+.chip .lab{height:22px;min-width:22px;font-size:.75rem;margin-right:6px;vertical-align:middle}
+.chip .lab.leco{min-width:34px;font-size:.62rem}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:13px 18px;cursor:pointer;background:var(--accent);color:var(--accent-fg);font-size:1rem;flex:1;min-width:140px}
+.btn.ghost{background:var(--sunk);color:var(--fg);border:1px solid var(--line);flex:0 0 auto;min-width:0;font-weight:600}
+.small{font-size:.8rem;color:var(--muted)}
+details>summary{cursor:pointer;font-weight:600;color:var(--accent);list-style:none}
+details>summary::-webkit-details-marker{display:none}
+.portals{display:flex;flex-direction:column;gap:0}
+.portal{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.portal:first-child{border-top:0;padding-top:0}
+.portal b{font-family:var(--display);font-size:1.2rem;letter-spacing:.02em}
+.portal .note{grid-column:1/2;font-size:.78rem;color:var(--muted)}
+.portal a.open{grid-row:1/3;grid-column:2;background:var(--accent-soft);color:var(--accent);text-decoration:none;font-weight:700;border-radius:9px;padding:10px 14px;white-space:nowrap}
+.status{font-size:.9rem;color:var(--muted)}
+.alert{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:12px 14px;font-size:.88rem}
+.alert a{color:inherit}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.toolbar select{width:auto;padding:7px 9px;font-size:14px}
+.cards{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:620px){.cards{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.ph{position:relative;aspect-ratio:4/3;background:var(--sunk);max-width:100%}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .src{position:absolute;left:8px;top:8px;background:rgba(10,14,20,.78);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 8px;border-radius:6px}
+.ph .lab{position:absolute;right:8px;top:8px;box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.ph .res{position:absolute;left:8px;bottom:8px;background:var(--warn);color:#fff;font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:6px}
+.cb{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;min-width:0;flex:1}
+.price{font-family:var(--display);font-weight:700;font-size:1.6rem;line-height:1;font-variant-numeric:tabular-nums}
+.ttl{font-weight:600;overflow-wrap:anywhere}
+.specs{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:.85rem;font-variant-numeric:tabular-nums}
+.specs span{white-space:nowrap}
+.meta{font-size:.8rem;color:var(--muted)}
+.desc{font-size:.84rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.cardact{display:flex;gap:8px;margin-top:auto;padding-top:4px}
+.cardact a,.cardact button{flex:1;text-align:center;font:inherit;font-size:.88rem;font-weight:700;border-radius:9px;padding:9px 8px;cursor:pointer;text-decoration:none}
+.cardact a{background:var(--accent);color:var(--accent-fg);border:0}
+.cardact button{background:var(--sunk);color:var(--fg);border:1px solid var(--line)}
+.saved{display:flex;flex-wrap:wrap;gap:6px}
+.saved .chip{display:inline-flex;align-items:center;gap:6px}
+.saved .x{color:var(--muted);font-weight:700}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.example{display:inline-block;background:var(--accent-soft);color:var(--accent);font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:3px 7px}
+@media (max-width:380px){.grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Radar <span>de</span> Coches</h1>
+      <p class="sub">Una búsqueda · Wallapop, coches.net, Milanuncios y AutoScout24</p>
+    </div>
+  </header>
+
+  <form id="form" class="panel" autocomplete="off">
+    <div class="toolbar">
+      <h2>Qué buscas</h2>
+      <span class="example" id="exampleTag">Búsqueda de ejemplo</span>
+    </div>
+    <div class="grid">
+      <label class="f"><span>Marca</span>
+        <select id="brand"></select></label>
+      <label class="f"><span>Modelo</span>
+        <input id="model" placeholder="206, Golf, Serie 3…" ></label>
+
+      <label class="f"><span>Provincia</span>
+        <select id="prov"></select></label>
+      <label class="f"><span>Radio (Wallapop · AutoScout)</span>
+        <select id="radius">
+          <option value="">Sin límite</option><option value="5">5 km</option><option value="10">10 km</option>
+          <option value="25">25 km</option><option value="50">50 km</option><option value="100">100 km</option><option value="200">200 km</option>
+        </select></label>
+      <div class="full small" id="geoRow">
+        <button type="button" class="chip" id="geoBtn">📍 Usar mi ubicación exacta para el radio</button>
+        <span id="geoInfo"></span>
+      </div>
+
+      <div class="f full"><span class="lbl">Precio (€)</span>
+        <div class="pair"><input id="pmin" inputmode="numeric" placeholder="Desde" aria-label="Precio desde"><span class="dash">–</span><input id="pmax" inputmode="numeric" placeholder="Hasta" aria-label="Precio hasta"></div></div>
+      <div class="f full"><span class="lbl">Kilómetros</span>
+        <div class="pair"><input id="kmin" inputmode="numeric" placeholder="Desde" aria-label="Km desde"><span class="dash">–</span><input id="kmax" inputmode="numeric" placeholder="Hasta" aria-label="Km hasta"></div></div>
+      <div class="f full"><span class="lbl">Año de matriculación</span>
+        <div class="pair"><input id="ymin" inputmode="numeric" placeholder="Desde" aria-label="Año desde"><span class="dash">–</span><input id="ymax" inputmode="numeric" placeholder="Hasta" aria-label="Año hasta"></div></div>
+      <label class="f full"><span>Cambio</span>
+        <select id="gear"><option value="">Cualquiera</option><option value="manual">Manual</option><option value="auto">Automático</option></select></label>
+
+      <div class="full f"><span class="lbl">Combustible</span>
+        <div class="chips" id="fuelChips"></div></div>
+      <div class="full f"><span class="lbl">Etiqueta DGT</span>
+        <div class="chips" id="labelChips"></div></div>
+      <div class="full f"><span class="lbl">Vendedor</span>
+        <div class="chips" id="sellerChips"></div></div>
+    </div>
+    <div class="actions">
+      <button class="btn" type="submit">Buscar en todas</button>
+      <button class="btn ghost" type="button" id="saveBtn">Guardar</button>
+      <button class="btn ghost" type="button" id="resetBtn">Limpiar</button>
+    </div>
+    <div id="savedWrap" hidden>
+      <span class="lbl">Búsquedas guardadas</span>
+      <div class="saved" id="saved"></div>
+    </div>
+  </form>
+
+  <section class="panel" id="portalsPanel">
+    <div class="toolbar"><h2>Abrir en cada web</h2><span class="small" id="portalsSummary"></span></div>
+    <div class="portals" id="portals"></div>
+  </section>
+
+  <section id="results" style="display:flex;flex-direction:column;gap:12px">
+    <div class="toolbar">
+      <h2>Anuncios de Wallapop</h2>
+      <label class="small">Orden
+        <select id="order">
+          <option value="closest">Más cerca</option>
+          <option value="newest">Más recientes</option>
+          <option value="price_low_to_high">Precio ↑</option>
+          <option value="price_high_to_low">Precio ↓</option>
+          <option value="most_relevance">Relevancia</option>
+        </select></label>
+    </div>
+    <div class="status" id="status">Pulsa «Buscar en todas» para cargar anuncios.</div>
+    <div class="cards" id="cards"></div>
+    <button class="btn ghost" id="moreBtn" type="button" hidden style="align-self:center;padding:12px 24px">Cargar más</button>
+  </section>
+
+  <p class="small">La etiqueta de los anuncios es una estimación por año y combustible (gasolina desde 2006 y diésel desde 2015 → C; gasolina 2001–2005 y diésel 2006–2014 → B). Confírmala con el vendedor o en la web de la DGT con la matrícula.</p>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ---------- Datos ----------
+const BRANDS=["Abarth","Alfa Romeo","Audi","BMW","BYD","Citroen","Cupra","Dacia","DS","Fiat","Ford","Honda","Hyundai","Jaguar","Jeep","Kia","Land Rover","Lexus","Mazda","Mercedes-Benz","MG","Mini","Mitsubishi","Nissan","Opel","Peugeot","Porsche","Renault","Seat","Skoda","Smart","Ssangyong","Subaru","Suzuki","Tesla","Toyota","Volkswagen","Volvo"];
+// [nombre, slug coches.net, slug milanuncios, lat, lon]
+const PROVS=[["A Coruña","a_coruna","la_coruna",43.36,-8.41],["Álava","alava","alava",42.85,-2.67],["Albacete","albacete","albacete",38.99,-1.86],["Alicante","alicante","alicante",38.35,-0.48],["Almería","almeria","almeria",36.84,-2.46],["Asturias","asturias","asturias",43.36,-5.85],["Ávila","avila","avila",40.66,-4.70],["Badajoz","badajoz","badajoz",38.88,-6.97],["Baleares","baleares","baleares",39.57,2.65],["Barcelona","barcelona","barcelona",41.39,2.17],["Burgos","burgos","burgos",42.34,-3.70],["Cáceres","caceres","caceres",39.48,-6.37],["Cádiz","cadiz","cadiz",36.53,-6.29],["Cantabria","cantabria","cantabria",43.46,-3.81],["Castellón","castellon","castellon",39.99,-0.05],["Ceuta","ceuta","ceuta",35.89,-5.32],["Ciudad Real","ciudad_real","ciudad_real",38.99,-3.93],["Córdoba","cordoba","cordoba",37.89,-4.78],["Cuenca","cuenca","cuenca",40.07,-2.13],["Girona","girona","girona",41.98,2.82],["Granada","granada","granada",37.18,-3.60],["Guadalajara","guadalajara","guadalajara",40.63,-3.17],["Guipúzcoa","guipuzcoa","guipuzcoa",43.32,-1.98],["Huelva","huelva","huelva",37.26,-6.94],["Huesca","huesca","huesca",42.14,-0.41],["Jaén","jaen","jaen",37.78,-3.79],["La Rioja","la_rioja","la_rioja",42.47,-2.45],["Las Palmas","las_palmas","las_palmas",28.12,-15.43],["León","leon","leon",42.60,-5.57],["Lleida","lleida","lleida",41.62,0.62],["Lugo","lugo","lugo",43.01,-7.56],["Madrid","madrid","madrid",40.4168,-3.7038],["Málaga","malaga","malaga",36.72,-4.42],["Melilla","melilla","melilla",35.29,-2.94],["Murcia","murcia","murcia",37.99,-1.13],["Navarra","navarra","navarra",42.81,-1.65],["Ourense","orense","ourense",42.34,-7.86],["Palencia","palencia","palencia",42.01,-4.53],["Pontevedra","pontevedra","pontevedra",42.43,-8.64],["Salamanca","salamanca","salamanca",40.97,-5.66],["Santa Cruz de Tenerife","sta_c_tenerife","tenerife",28.46,-16.25],["Segovia","segovia","segovia",40.95,-4.12],["Sevilla","sevilla","sevilla",37.39,-5.98],["Soria","soria","soria",41.76,-2.47],["Tarragona","tarragona","tarragona",41.12,1.25],["Teruel","teruel","teruel",40.34,-1.11],["Toledo","toledo","toledo",39.86,-4.03],["Valencia","valencia","valencia",39.47,-0.38],["Valladolid","valladolid","valladolid",41.65,-4.72],["Vizcaya","vizcaya","vizcaya",43.26,-2.93],["Zamora","zamora","zamora",41.50,-5.75],["Zaragoza","zaragoza","zaragoza",41.65,-0.89]];
+const FUELS=[["","Cualquiera"],["gasolina","Gasolina"],["diesel","Diésel"],["hibrido","Híbrido"],["electrico","Eléctrico"],["glp","GLP"]];
+const LABELS=[["","Cualquiera"],["0","0"],["ECO","ECO"],["C","C"],["B","B"]];
+const SELLERS=[["","Todos"],["part","Particular"],["prof","Profesional"]];
+const EXAMPLE={brand:"Peugeot",model:"206",prov:"Madrid",radius:"50",pmin:"",pmax:"",kmin:"",kmax:"200000",ymin:"",ymax:"",gear:"",fuel:"",label:"C",seller:""};
+
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let geo=null; // {lat,lon}
+
+// ---------- Formulario ----------
+$("brand").innerHTML='<option value="">Todas las marcas</option>'+BRANDS.map(b=>`<option>${b}</option>`).join("");
+$("prov").innerHTML='<option value="">Toda España</option>'+PROVS.map(p=>`<option>${p[0]}</option>`).join("");
+function chipGroup(el,list,name,render){
+  el.innerHTML=list.map(([v,t])=>`<button type="button" class="chip" data-v="${v}" aria-pressed="false">${render?render(v,t):t}</button>`).join("");
+  el.addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;el.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b?"true":"false"));markEdited()});
+}
+const labHtml=(v,t)=>v===""?t:`<span class="lab ${labClass(v)}">${v}</span>${{"0":"Cero","ECO":"Eco","C":"Verde","B":"Amarilla"}[v]}`;
+chipGroup($("fuelChips"),FUELS,"fuel");
+chipGroup($("labelChips"),LABELS,"label",labHtml);
+chipGroup($("sellerChips"),SELLERS,"seller");
+const chipVal=el=>(el.querySelector('[aria-pressed="true"]')||{}).dataset?.v||"";
+const setChip=(el,v)=>el.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c.dataset.v===(v||"")?"true":"false"));
+
+const FIELDS=["brand","model","prov","radius","pmin","pmax","kmin","kmax","ymin","ymax","gear"];
+function readForm(){const s={};FIELDS.forEach(f=>s[f]=$(f).value.trim());s.fuel=chipVal($("fuelChips"));s.label=chipVal($("labelChips"));s.seller=chipVal($("sellerChips"));
+  ["pmin","pmax","kmin","kmax","ymin","ymax"].forEach(k=>s[k]=s[k].replace(/[^\d]/g,""));return s}
+function writeForm(s){FIELDS.forEach(f=>$(f).value=s[f]||"");setChip($("fuelChips"),s.fuel);setChip($("labelChips"),s.label);setChip($("sellerChips"),s.seller)}
+function markEdited(){$("exampleTag").hidden=true}
+$("form").addEventListener("input",markEdited);
+
+// ---------- Utilidades ----------
+const slug=s=>(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const prov=s=>PROVS.find(p=>p[0]===s.prov);
+const fmt=n=>n==null||n===""?"":Number(n).toLocaleString("es-ES");
+function qs(o){return Object.entries(o).filter(([k,v])=>v!==""&&v!=null).map(([k,v])=>encodeURIComponent(k)+"="+encodeURIComponent(v)).join("&")}
+function labClass(l){return {"0":"l0","ECO":"leco","C":"lc","B":"lb"}[l]||"lnone"}
+// Año mínimo implícito por etiqueta (para webs sin filtro de etiqueta)
+function labelMinYear(s){if(s.label==="C")return s.fuel==="diesel"?2015:2006;if(s.label==="B")return s.fuel==="diesel"?2006:2001;return null}
+function effYmin(s){const m=labelMinYear(s);const y=s.ymin?Number(s.ymin):null;return m&&(!y||y<m)?String(m):s.ymin}
+function estLabel(engine,year){
+  const e=(engine||"").toLowerCase();
+  if(e.includes("eléctr")||e.includes("electr"))return "0";
+  if(e.includes("híbr")||e.includes("hibr")||e.includes("gas ")||e==="gas"||e.includes("glp")||e.includes("gnc"))return "ECO";
+  if(!year)return "?";
+  if(e.includes("gasolina")){if(year>=2006)return "C";if(year>=2001)return "B";return "—"}
+  if(e.includes("diés")||e.includes("dies")){if(year>=2015)return "C";if(year>=2006)return "B";return "—"}
+  return "?";
+}
+
+// ---------- Enlaces a cada portal ----------
+function urlCoches(s){
+  const p=prov(s);let path="/";
+  const cs=t=>(t||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9\-]+/g,"_").replace(/^_|_$/g,"");
+  if(s.brand){path+=cs(s.brand)+"/";if(s.model)path+=cs(s.model)+"/"}
+  path+="segunda-mano/";if(p)path+=p[1]+"/";
+  const fuel={gasolina:2,diesel:1,electrico:3,hibrido:4,glp:6}[s.fuel]||"";
+  const q=qs({MinPrice:s.pmin,MaxPrice:s.pmax,MinKms:s.kmin,MaxKms:s.kmax,MinYear:s.ymin,MaxYear:s.ymax,FuelTypeId:fuel,TransmissionTypeId:{manual:2,auto:1}[s.gear]||"",EnvironmentalLabels:s.label,st:{prof:1,part:2}[s.seller]||"",or:"",fi:""});
+  return "https://www.coches.net"+path+(q?"?"+q:"");
+}
+function urlMil(s){
+  const p=prov(s);let base=s.brand?slug(s.brand)+(s.model?"-"+slug(s.model):""):"coches";
+  let path="/"+base+"-de-segunda-mano"+(p?"-en-"+p[2]:"")+"/";
+  const fuel={gasolina:"gasolina",diesel:"diesel",electrico:"electrico",hibrido:"hibrido",glp:"glp"}[s.fuel]||"";
+  const q=qs({desde:s.pmin,hasta:s.pmax,kilometersFrom:s.kmin,kilometersTo:s.kmax,anod:s.ymin,anoh:s.ymax,fuels:fuel,environmentalLabel:s.label,vendedor:s.seller,cajacambio:{manual:"manual",auto:"automatico"}[s.gear]||""});
+  return "https://www.milanuncios.com"+path+(q?"?"+q:"");
+}
+function center(s){if(geo)return geo;const p=prov(s);return p?{lat:p[3],lon:p[4]}:null}
+function urlWalla(s){
+  const c=center(s);
+  const q=qs({category_id:100,brand:s.brand,model:s.model,min_sale_price:s.pmin,max_sale_price:s.pmax,min_km:s.kmin,max_km:s.kmax,min_year:effYmin(s),max_year:s.ymax,engine:{gasolina:"gasoline",diesel:"gasoil",electrico:"electric-hybrid",hibrido:"electric-hybrid"}[s.fuel]||"",gearbox:{manual:"manual",auto:"automatic"}[s.gear]||"",latitude:c?c.lat:"",longitude:c?c.lon:"",distance_in_km:s.radius&&c?s.radius:"",order_by:$("order").value});
+  return "https://es.wallapop.com/search?"+q;
+}
+function urlAS(s){
+  const c=center(s);let path="/lst"+(s.brand?"/"+slug(s.brand)+(s.model?"/"+slug(s.model):""):"");
+  const q=qs({atype:"C",cy:"E",pricefrom:s.pmin,priceto:s.pmax,kmfrom:s.kmin,kmto:s.kmax,fregfrom:effYmin(s),fregto:s.ymax,fuel:{gasolina:"B",diesel:"D",electrico:"E",hibrido:"2",glp:"L"}[s.fuel]||"",gear:{manual:"M",auto:"A"}[s.gear]||"",custtype:{part:"P",prof:"D"}[s.seller]||"",lat:c?c.lat:"",lon:c?c.lon:"",zipr:c?(s.radius||(geo?"":"100")):"",sort:"standard",desc:0});
+  return "https://www.autoscout24.es"+path+"?"+q;
+}
+function renderPortals(s){
+  const p=prov(s);const lbl=s.label;
+  const rows=[
+    ["Wallapop",urlWalla(s),`Radio ${s.radius?s.radius+" km":"libre"}${lbl?" · etiqueta aproximada por año":""} · no filtra vendedor`],
+    ["coches.net",urlCoches(s),`Filtra todo, etiqueta incluida · zona: ${p?p[0]:"toda España"} (sin radio)`],
+    ["Milanuncios",urlMil(s),`Filtra todo, etiqueta incluida · zona: ${p?p[0]:"toda España"} (sin radio)`],
+    ["AutoScout24",urlAS(s),`Radio ${s.radius?s.radius+" km":(p?"100 km":"libre")}${lbl?" · etiqueta aproximada por año":""}`]
+  ];
+  $("portals").innerHTML=rows.map(([n,u,note])=>`<div class="portal"><b>${n}</b><span class="note">${note}</span><a class="open" href="${u}" target="_blank" rel="noopener">Abrir ↗</a></div>`).join("");
+}
+
+// ---------- Wallapop en la app ----------
+const API="https://api.wallapop.com/api/v3/search";
+let nextPage=null,current=null,shown=0,loading=false;
+function wallaApiUrl(s,useKeywords){
+  const c=center(s)||{lat:40.4168,lon:-3.7038};
+  return API+"?"+qs({category_id:100,source:useKeywords?"search_box":"side_bar_filters",keywords:useKeywords?(s.brand+" "+s.model).trim():"",brand:useKeywords?"":s.brand,model:useKeywords?"":s.model,min_sale_price:s.pmin,max_sale_price:s.pmax,min_km:s.kmin,max_km:s.kmax,min_year:effYmin(s),max_year:s.ymax,engine:{gasolina:"gasoline",diesel:"gasoil",electrico:"electric-hybrid",hibrido:"electric-hybrid"}[s.fuel]||"",gearbox:{manual:"manual",auto:"automatic"}[s.gear]||"",latitude:c.lat,longitude:c.lon,distance_in_km:s.radius||"",order_by:$("order").value});
+}
+function passes(s,it){
+  const a=it.type_attributes||{};
+  if(s.label){const l=estLabel(a.engine,a.year);if(l!==s.label)return false}
+  if(s.fuel==="hibrido"&&!/h[ií]brid/i.test(a.engine||""))return false;
+  if(s.fuel==="electrico"&&!/el[eé]ctr/i.test(a.engine||""))return false;
+  return true;
+}
+function dist(a,b){const R=6371,t=x=>x*Math.PI/180;const d1=t(b.lat-a.lat),d2=t(b.lon-a.lon);const h=Math.sin(d1/2)**2+Math.cos(t(a.lat))*Math.cos(t(b.lat))*Math.sin(d2/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function ago(ms){const d=Math.floor((Date.now()-ms)/864e5);if(d<1)return "hoy";if(d===1)return "ayer";if(d<30)return `hace ${d} días`;const m=Math.floor(d/30);return m<12?`hace ${m} ${m===1?"mes":"meses"}`:`hace más de un año`}
+const esc=t=>String(t??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function cardHtml(it,s){
+  const a=it.type_attributes||{};const l=estLabel(a.engine,a.year);const c=center(s);
+  const km=c&&it.location?Math.round(dist(c,{lat:it.location.latitude,lon:it.location.longitude})):null;
+  const img=it.images&&it.images[0]?it.images[0].urls.medium:"";
+  const url="https://es.wallapop.com/item/"+it.web_slug;
+  const specs=[a.year,a.km!=null?fmt(a.km)+" km":null,a.engine,a.gearbox,a.horsepower?a.horsepower+" CV":null].filter(Boolean);
+  return `<article class="card">
+    <div class="ph">${img?`<img loading="lazy" src="${esc(img)}" alt="">`:""}<span class="src">Wallapop</span>${l!=="?"?`<span class="lab ${labClass(l)}" title="Etiqueta estimada">${l==="—"?"SIN":l}</span>`:""}${it.reserved&&it.reserved.flag?'<span class="res">Reservado</span>':""}</div>
+    <div class="cb">
+      <div class="price">${fmt(it.price&&it.price.amount)} €</div>
+      <div class="ttl">${esc(it.title)}</div>
+      <div class="specs">${specs.map(x=>`<span>${esc(x)}</span>`).join("")}</div>
+      <div class="meta">${esc(it.location?it.location.city:"")}${km!=null?` · a ${km} km`:""} · publicado ${ago(it.created_at)}</div>
+      <div class="desc">${esc(it.description)}</div>
+      <div class="cardact"><a href="${url}" target="_blank" rel="noopener">Ver anuncio ↗</a><button type="button" data-copy="${esc(it.id)}">Copiar datos</button></div>
+    </div></article>`;
+}
+const cache=new Map();
+async function fetchPage(url){
+  const r=await fetch(url,{headers:{"X-DeviceOS":"0"}});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  return r.json();
+}
+async function loadWalla(reset){
+  if(loading)return;loading=true;
+  const s=current;
+  if(reset){$("cards").innerHTML="";shown=0;nextPage=null;cache.clear()}
+  $("status").textContent="Buscando en Wallapop…";$("moreBtn").hidden=true;
+  try{
+    let added=0,guard=0,url=reset?wallaApiUrl(s):API+"?next_page="+encodeURIComponent(nextPage);
+    // si hay filtros que se aplican aquí (etiqueta), pedimos más páginas hasta llenar
+    let triedKw=false;
+    while(url&&guard<6){
+      const j=await fetchPage(url);guard++;
+      const items=((j.data||{}).section||{}).payload?.items||[];
+      // Si el modelo no coincide con el catálogo de Wallapop, repetimos por palabras clave
+      if(reset&&!items.length&&!shown&&s.model&&!triedKw){triedKw=true;url=wallaApiUrl(s,true);continue}
+      nextPage=(j.meta||{}).next_page||null;
+      const ok=items.filter(it=>passes(s,it));
+      ok.forEach(it=>cache.set(it.id,it));
+      $("cards").insertAdjacentHTML("beforeend",ok.map(it=>cardHtml(it,s)).join(""));
+      added+=ok.length;shown+=ok.length;
+      if(added>=12||!nextPage)break;
+      url=API+"?next_page="+encodeURIComponent(nextPage);
+    }
+    $("status").textContent=shown?`${shown} anuncios en Wallapop${s.label?" (etiqueta "+s.label+" estimada)":""}`:"Wallapop no tiene anuncios con estos filtros. Prueba a ampliar el radio o quitar algún filtro.";
+    $("moreBtn").hidden=!nextPage;
+  }catch(e){
+    $("status").innerHTML=`<div class="alert"><b>Los anuncios no se pueden cargar dentro de esta página.</b> Aquí el navegador bloquea las conexiones a otras webs. Usa los botones «Abrir» de arriba, o abre la versión completa de Radar de Coches (la misma app alojada en su propia web), que sí muestra los anuncios de Wallapop aquí mismo.</div>`;
+  }finally{loading=false}
+}
+$("moreBtn").addEventListener("click",()=>loadWalla(false));
+$("order").addEventListener("change",()=>{if(current){renderPortals(current);loadWalla(true)}});
+
+$("cards").addEventListener("click",async e=>{
+  const b=e.target.closest("[data-copy]");if(!b)return;
+  const it=cache.get(b.dataset.copy);if(!it)return;const a=it.type_attributes||{};
+  const txt=[`${it.title} — ${fmt(it.price.amount)} €`,`${a.brand||""} ${a.model||""} ${a.version||""}`.trim(),`Año ${a.year||"?"} · ${fmt(a.km)} km · ${a.engine||""} · ${a.gearbox||""}${a.horsepower?" · "+a.horsepower+" CV":""}`,`Etiqueta estimada: ${estLabel(a.engine,a.year)}`,`${it.location?.city||""} (${it.location?.postal_code||""})`,`Wallapop: https://es.wallapop.com/item/${it.web_slug}`].join("\n");
+  try{await navigator.clipboard.writeText(txt);toast("Datos copiados")}catch(err){toast("No se pudo copiar")}
+});
+
+// ---------- Ubicación ----------
+$("geoBtn").addEventListener("click",()=>{
+  if(geo){geo=null;$("geoBtn").setAttribute("aria-pressed","false");$("geoInfo").textContent="";return}
+  if(!navigator.geolocation){$("geoInfo").textContent=" Este navegador no da la ubicación; usa la provincia.";return}
+  $("geoInfo").textContent=" Pidiendo ubicación…";
+  navigator.geolocation.getCurrentPosition(p=>{geo={lat:+p.coords.latitude.toFixed(4),lon:+p.coords.longitude.toFixed(4)};$("geoBtn").setAttribute("aria-pressed","true");$("geoInfo").textContent=" Usando tu ubicación. coches.net y Milanuncios siguen usando la provincia.";if(!$("radius").value)$("radius").value="10"},
+    ()=>{$("geoInfo").textContent=" No se pudo obtener tu ubicación aquí; usa la provincia y el radio."},{timeout:10000});
+});
+
+// ---------- Guardadas ----------
+function describe(s){return [s.brand||"Cualquier marca",s.model,s.prov||"España",s.radius?s.radius+" km":"",s.kmax?"≤"+fmt(s.kmax)+" km":"",s.pmax?"≤"+fmt(s.pmax)+" €":"",s.label?"Etiq. "+s.label:""].filter(Boolean).join(" · ")}
+function renderSaved(){const list=store.get("rdc_saved",[]);$("savedWrap").hidden=!list.length;
+  $("saved").innerHTML=list.map((s,i)=>`<button type="button" class="chip" data-i="${i}">${esc(describe(s))} <span class="x" data-del="${i}" aria-label="Borrar">×</span></button>`).join("")}
+$("saved").addEventListener("click",e=>{const d=e.target.closest("[data-del]");const list=store.get("rdc_saved",[]);
+  if(d){list.splice(+d.dataset.del,1);store.set("rdc_saved",list);renderSaved();return}
+  const b=e.target.closest("[data-i]");if(b){writeForm(list[+b.dataset.i]);markEdited();run()}});
+$("saveBtn").addEventListener("click",()=>{const s=readForm();const list=store.get("rdc_saved",[]);list.unshift(s);store.set("rdc_saved",list.slice(0,12));renderSaved();toast("Búsqueda guardada")});
+$("resetBtn").addEventListener("click",()=>{writeForm({});geo=null;$("geoInfo").textContent="";$("geoBtn").setAttribute("aria-pressed","false");markEdited()});
+
+let tt;function toast(t){$("toast").textContent=t;$("toast").classList.add("on");clearTimeout(tt);tt=setTimeout(()=>$("toast").classList.remove("on"),1800)}
+
+// ---------- Buscar ----------
+function run(){current=readForm();store.set("rdc_last",current);renderPortals(current);
+  $("portalsSummary").textContent=describe(current);loadWalla(true)}
+$("form").addEventListener("submit",e=>{e.preventDefault();run();$("portalsPanel").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})});
+
+// Arranque: última búsqueda o ejemplo
+const last=store.get("rdc_last",null);
+writeForm(last||EXAMPLE);if(last)$("exampleTag").hidden=true;
+renderSaved();
+run();
+</script>
+
+</body></html>
